@@ -9,24 +9,23 @@ net.createServer(function (socket) {
     socket.setEncoding('utf8');
     console.log('Conntected ' + socket.remoteAddress + ':' + socket.remotePort);
     socket.on('data', function (data) {
-        var obj = JSON.parse(data);
+        console.log(data);
+        var obj;
+        try {
+            obj = JSON.parse(data);
+        }
+        catch (e) {
+            return;
+        }
         if (obj.Operation === 'login') {
-            for (var i = 0; i < clients.length; i++) {
-                if (clients[i].From == 0 && clients[i].User == obj.User) {
-                    socket.write('onlined');
-                    return;
-                }
-            }
-            var socketInfo = {User: obj.User, From: null, Socket: null};
-            if (obj.From == 0) {
-                socketInfo.From = 0;
-                console.log("Phone User: " + obj.User + " Login.");
-            }
+
+            var socketInfo = {User: obj.User, Socket: null};
+
             if (obj.From == 1) {
                 socketInfo.From = 1;
+                socketInfo.Socket = socket;
                 console.log("Desktop User: " + obj.User + " Login.");
             }
-            socketInfo.Socket = socket;
             clients.push(socketInfo);
             socket.write('ok');
             return;
@@ -39,6 +38,7 @@ net.createServer(function (socket) {
                     return;
                 }
             }
+            socket.write('No desktop online!');
         }
     });
 
